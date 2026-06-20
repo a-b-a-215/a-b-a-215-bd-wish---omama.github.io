@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Happy Birthday Omama!</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: linear-gradient(135deg, #ffe5ec, #ffc2d1);
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            overflow-x: hidden;
+            min-height: 100vh;
+            width: 100%;
+        }
+
+        /* --- Full Screen Exploding Intro Animation --- */
+        #intro-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: #fff0f5;
+            z-index: 99999;
+            overflow: hidden;
+            transition: opacity 1.2s cubic-bezier(0.25, 1, 0.5, 1);
+            pointer-events: auto;
+        }
+
+        #tree-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        .intro-text {
+            position: absolute;
+            bottom: 8%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            max-width: 500px;
+            text-align: center;
+            font-size: 1.8rem;
+            color: #ff477e;
+            font-weight: bold;
+            font-family: 'Brush Script MT', cursive, sans-serif;
+            text-shadow: 0 2px 10px rgba(255, 255, 255, 0.9);
+            z-index: 100000;
+            pointer-events: none;
+            opacity: 0;
+            animation: fadeInOut 14.5s ease-in-out forwards;
+        }
+
+        @media (max-width: 480px) {
+            .intro-text { font-size: 1.4rem; bottom: 12%; }
+        }
+
+        @keyframes fadeInOut {
+            0% { opacity: 0; transform: translate(-50%, 15px); }
+            5% { opacity: 1; transform: translate(-50%, 0); }
+            92% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+
+        /* --- Main Birthday Content --- */
+        .main-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px 15px 40px 15px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            justify-content: center;
+        }
+
+        header h1 {
+            font-size: clamp(2.2rem, 8vw, 3.8rem);
+            color: #ff0a54;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.06);
+            margin-bottom: 8px;
+            font-family: cursive, sans-serif;
+        }
+
+        header p {
+            font-size: clamp(1.1rem, 4vw, 1.6rem);
+            color: #ff477e;
+            font-weight: 600;
+            margin-bottom: clamp(20px, 5vh, 40px);
+        }
+
+        /* --- Responsive FX Slider --- */
+        .slider-container {
+            position: relative;
+            width: 100%;
+            max-width: 550px;
+            height: clamp(350px, 60vh, 460px);
+            margin: 0 auto 30px auto;
+            overflow: hidden;
+            border-radius: 24px;
+            box-shadow: 0 12px 30px rgba(255, 71, 126, 0.25);
+            background: #fff;
+        }
+
+        .slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            transform: scale(1.08) translateY(5px);
+            transition: opacity 0.8s cubic-bezier(0.25, 1, 0.5, 1), transform 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+        }
+
+        .slide.active {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+        }
+
+        .slide img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
+        }
+
+        .slide-overlay {
+            position: relative;
+            z-index: 2;
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.85) 0%, rgba(0, 0, 0, 0.4) 70%, transparent 100%);
+            padding: 30px 20px 25px 20px;
+            color: white;
+            text-align: center;
+        }
+
+        .slide-overlay h3 {
+            font-size: clamp(1.3rem, 5vw, 1.8rem);
+            margin-bottom: 6px;
+            color: #ff99b6;
+            font-family: cursive, sans-serif;
+        }
+
+        .slide-overlay p {
+            font-size: clamp(0.95rem, 3.5vw, 1.1rem);
+            line-height: 1.4;
+            opacity: 0.95;
+            font-weight: 300;
+        }
+
+        /* Responsive Controls */
+        .slider-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            border: none;
+            width: clamp(40px, 10vw, 48px);
+            height: clamp(40px, 10vw, 48px);
+            border-radius: 50%;
+            font-size: 1.2rem;
+            color: #ff477e;
+            cursor: pointer;
+            z-index: 10;
+            transition: background 0.3s, color 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .slider-btn:hover {
+            background: #ff477e;
+            color: white;
+        }
+
+        .prev-btn { left: 12px; }
+        .next-btn { right: 12px; }
+
+        /* --- Bubble Cursor Canvas --- */
+        #bubble-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 999999;
+        }
+
+        footer {
+            margin-top: auto;
+            font-size: clamp(1rem, 3vw, 1.2rem);
+            color: #ff477e;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="intro-screen">
+        <canvas id="tree-canvas"></canvas>
+        <div class="intro-text">Growing a beautiful world of love for Omama... ✨</div>
+    </div>
+
+    <canvas id="bubble-canvas"></canvas>
+
+    <div class="main-container">
+        <header>
+            <h1>Happy Birthday, Omama!</h1>
+            <p>Celebrating You This 21st June ✨</p>
+        </header>
+
+        <div class="slider-container">
+            <button class="slider-btn prev-btn" aria-label="Previous Slide">&#10094;</button>
+            <button class="slider-btn next-btn" aria-label="Next Slide">&#10095;</button>
+
+            <div class="slide active">
+                <img src="https://images.unsplash.com/photo-1513151233558-d860c5398176?w=800" alt="Omama 1">
+                <div class="slide-overlay">
+                    <h3>The Kindest Soul</h3>
+                    <p>Omama, your presence brings warmth and absolute joy to everyone around you. You are truly one of a kind!</p>
+                </div>
+            </div>
+
+            <div class="slide">
+                <img src="https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=800" alt="Omama 2">
+                <div class="slide-overlay">
+                    <h3>A Bright & Beautiful Mind</h3>
+                    <p>Your intelligence, grace, and laughter make the world a much brighter place. Never stop shining your unique light.</p>
+                </div>
+            </div>
+
+            <div class="slide">
+                <img src="https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=800" alt="Omama 3">
+                <div class="slide-overlay">
+                    <h3>May Your Future Blossom</h3>
+                    <p>Wishing you a spectacular future filled with achieved goals, endless love, and all the success you rightfully deserve!</p>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>Made with ❤️ just for you on 21st June</p>
+        </footer>
+    </div>
+
+    <script>
+        // --- HIGH PERFORMANCE PRO-GRADE ANIMATION ENGINE ---
+        const treeCanvas = document.getElementById('tree-canvas');
+        const tCtx = treeCanvas.getContext('2d', { alpha: false }); // Hardware optimization tag
+        
+        let width, height;
+        function resizeTreeCanvas() {
+            width = window.innerWidth;
+            height = window.innerHeight;
+            // Handle high-DPI retina mobile and desktop screens perfectly
+            const dpr = window.devicePixelRatio || 1;
+            treeCanvas.width = width * dpr;
+            treeCanvas.height = height * dpr;
+            tCtx.scale(dpr, dpr);
+        }
+        resizeTreeCanvas();
+
+        let branches = [];
+        let hearts = [];
+        const heartColors = ['#ff0a54', '#ff477e', '#ff70a6', '#ff99b6', '#ffd166', '#4ea8de', '#b5179e'];
+        
+        class Branch {
+            constructor(startX, startY, angle, length, width, depth) {
+                this.startX = startX;
+                this.startY = startY;
+                this.angle = angle;
+                this.length = length;
+                this.width = width;
+                this.depth = depth;
+                
+                this.currentLength = 0;
+                this.endX = startX + Math.cos(angle) * length;
+                this.endY = startY + Math.sin(angle) * length;
+                // Calibrated speed ratios to pace growth over 15 seconds perfectly without snapping
+                this.speed = (length / (100 + (depth * 45))); 
+                this.grown = false;
+                this.childrenSpawned = false;
+            }
+
+            update() {
+                if (this.currentLength < this.length) {
+                    this.currentLength += this.speed;
+                    if (this.currentLength >= this.length) {
+                        this.currentLength = this.length;
+                        this.grown = true;
+                    }
+                }
+                this.curX = this.startX + Math.cos(this.angle) * this.currentLength;
+                this.curY = this.startY + Math.sin(this.angle) * this.currentLength;
+            }
+
+            draw() {
+                tCtx.beginPath();
+                tCtx.moveTo(this.startX, this.startY);
+                tCtx.lineTo(this.curX, this.curY);
+                tCtx.strokeStyle = '#4a2c2a';
+                tCtx.lineWidth = this.width;
+                tCtx.lineCap = 'round';
+                tCtx.stroke();
+            }
+        }
+
+        // Optimized procedural vector heart rendering
+        function drawHeart(ctx, x, y, size, color) {
+            ctx.save();
+            ctx.beginPath();
+            ctx.translate(x, y);
+            ctx.scale(size, size);
+            ctx.moveTo(0, 0);
+            ctx.bezierCurveTo(-5, -5, -10, -2, -10, 3);
+            ctx.bezierCurveTo(-10, 8, -5, 12, 0, 17);
+            ctx.bezierCurveTo(5, 12, 10, 8, 10, 3);
+            ctx.bezierCurveTo(10, -2, 5, -5, 0, 0);
+            ctx.fillStyle = color;
+            ctx.fill();
+            ctx.restore();
+        }
+
+        // Dynamic base scaling adapted for phone viewports vs ultra-wide displays
+        const scaleFactor = Math.min(width / 800, 1);
+        const baseWidth = Math.max(12, 28 * scaleFactor);
+        const baseLength = height * 0.24;
+        branches.push(new Branch(width / 2, height, -Math.PI / 2, baseLength, baseWidth, 0));
+
+        let startTime = null;
+
+        function animateTree(timestamp) {
+            if (!startTime) startTime = timestamp;
+            const elapsed = timestamp - startTime;
+
+            // Soft canvas clear
+            tCtx.fillStyle = '#fff0f5';
+            tCtx.fillRect(0, 0, width, height);
+
+            // 1. Manage branch structure expansion over the timeline
+            for (let i = 0; i < branches.length; i++) {
+                let b = branches[i];
+                b.update();
+                b.draw();
+
+                if (b.grown && !b.childrenSpawned && b.depth < 5) {
+                    b.childrenSpawned = true;
+                    // Max branches capping for high frames retention on mobile GPUs
+                    let numBranches = (width < 600) ? 2 : 3; 
+                    for (let j = 0; j < numBranches; j++) {
+                        let angleOffset = (j - (numBranches - 1) / 2) * (Math.random() * 0.35 + 0.35);
+                        let newAngle = b.angle + angleOffset;
+                        let newLength = b.length * (Math.random() * 0.15 + 0.68);
+                        let newWidth = b.width * 0.62;
+                        
+                        branches.push(new Branch(b.endX, b.endY, newAngle, newLength, newWidth, b.depth + 1));
+                    }
+                }
+
+                // Smoothly cascade heart bloom allocations into the timeline up to 13 seconds
+                if (b.depth >= 3 && elapsed > 3000 && elapsed < 13500 && Math.random() < 0.08 && hearts.length < 280) {
+                    hearts.push({
+                        x: b.curX + (Math.random() * 70 - 35),
+                        y: b.curY + (Math.random() * 70 - 35),
+                        targetSize: (Math.random() * 0.9 + 0.5) * scaleFactor,
+                        currentSize: 0,
+                        color: heartColors[Math.floor(Math.random() * heartColors.length)]
+                    });
+                }
+            }
+
+            // 2. Render Heart Blooms
+            for (let i = 0; i < hearts.length; i++) {
+                let h = hearts[i];
+                if (h.currentSize < h.targetSize) {
+                    h.currentSize += 0.015; // Slow down growth velocity for 15s elegance
+                }
+                drawHeart(tCtx, h.x, h.y, h.currentSize, h.color);
+            }
+
+            if (elapsed < 15500) {
+                requestAnimationFrame(animateTree);
+            }
+        }
+        
+        requestAnimationFrame(animateTree);
+
+        // Precise removal of the landing shield at exactly 15 seconds
+        setTimeout(() => {
+            const intro = document.getElementById('intro-screen');
+            intro.style.opacity = '0';
+            setTimeout(() => {
+                intro.style.display = 'none';
+                // Garbage Collection clear
+                branches = [];
+                hearts = [];
+            }, 1200); 
+        }, 15000);
+
+
+        // --- AUTOMATED & TOUCH RESPONSIBLE FX SLIDER ---
+        const slides = document.querySelectorAll('.slide');
+        const prevBtn = document.querySelector('.prev-btn');
+        const nextBtn = document.querySelector('.next-btn');
+        let currentSlide = 0;
+        let sliderInterval;
+
+        function showSlide(index) {
+            slides[currentSlide].classList.remove('active');
+            currentSlide = (index + slides.length) % slides.length;
+            slides[currentSlide].classList.add('active');
+        }
+
+        function resetTimer() {
+            clearInterval(sliderInterval);
+            sliderInterval = setInterval(() => showSlide(currentSlide + 1), 4500);
+        }
+
+        prevBtn.addEventListener('click', () => { showSlide(currentSlide - 1); resetTimer(); });
+        nextBtn.addEventListener('click', () => { showSlide(currentSlide + 1); resetTimer(); });
+        resetTimer();
+
+
+        // --- HYBRID MOUSE & TOUCH CURSOR BUBBLES ---
+        const bCanvas = document.getElementById('bubble-canvas');
+        const bCtx = bCanvas.getContext('2d');
+        let particlesArray = [];
+
+        function resizeBubbleCanvas() {
+            bCanvas.width = window.innerWidth;
+            bCanvas.height = window.innerHeight;
+        }
+        
+        window.addEventListener('resize', () => {
+            resizeTreeCanvas();
+            resizeBubbleCanvas();
+        });
+        resizeBubbleCanvas();
+
+        function createBubbles(clientX, clientY) {
+            // Cap count for low processing latency on older phones
+            const count = (window.innerWidth < 600) ? 1 : 2;
+            for(let i = 0; i < count; i++) {
+                particlesArray.push(new Bubble(clientX, clientY));
+            }
+        }
+
+        window.addEventListener('mousemove', (e) => createBubbles(e.clientX, e.clientY));
+        window.addEventListener('touchmove', (e) => {
+            if(e.touches.length > 0) {
+                createBubbles(e.touches[0].clientX, e.touches[0].clientY);
+            }
+        }, { passive: true });
+
+        class Bubble {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.size = Math.random() * 7 + 3;
+                this.speedX = Math.random() * 1.6 - 0.8;
+                this.speedY = Math.random() * -2.5 - 0.8;
+                this.color = `hsla(${Math.random() * 35 + 335}, 100%, 78%, 0.75)`;
+            }
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                if (this.size > 0.15) this.size -= 0.08;
+            }
+            draw() {
+                bCtx.beginPath();
+                bCtx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                bCtx.fillStyle = this.color;
+                bCtx.fill();
+            }
+        }
+
+        function animateBubbles() {
+            bCtx.clearRect(0, 0, bCanvas.width, bCanvas.height);
+            for (let i = 0; i < particlesArray.length; i++) {
+                particlesArray[i].update();
+                particlesArray[i].draw();
+                if (particlesArray[i].size <= 0.15) {
+                    particlesArray.splice(i, 1);
+                    i--;
+                }
+            }
+            requestAnimationFrame(animateBubbles);
+        }
+        animateBubbles();
+    </script>
+</body>
+</html>
